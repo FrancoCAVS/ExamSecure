@@ -14,7 +14,7 @@ import {
     AllQuestionTypesForAutoGen,
     ConcreteAIQuestionType
 } from '@/ai/flows/generate-exam-questions-types';
-import { generateExamQuestions } from '@/ai/flows/generate-exam-questions-flow';
+
 import { useToast } from "@/hooks/use-toast";
 
 import { Button } from "@/components/ui/button";
@@ -457,146 +457,149 @@ export function ExamBuilderForm({ initialData, examId }: ExamBuilderFormProps) {
     append(newQuestionPayload);
   };
 
-  const handleAIQuestionGeneration = async () => {
+ // Pega este código en tu archivo ExamBuilderForm.tsx, reemplazando la función original.
+
+const handleAIQuestionGeneration = async () => {
     setIsGeneratingAI(true);
     try {
-      const examData = getValues();
-      const input: GenerateExamQuestionsInput = {
-        examTitle: examData.title,
-        examDescription: examData.description,
-        numQuestions: aiDialogOptions.numQuestions,
-        topic: aiDialogOptions.topic || undefined,
-        questionTypeToGenerate: aiDialogOptions.questionTypeToGenerate === "ANY" ? undefined : aiDialogOptions.questionTypeToGenerate as ConcreteAIQuestionType,
-        contextText: aiDialogOptions.contextText || undefined,
-        additionalInstructions: aiDialogOptions.additionalInstructions || undefined,
-      };
-
-      try {
-        const webhookPayload = {
-          source: 'ExamSecure - AI Question Generation Attempt',
-          generationParams: aiDialogOptions,
-          examContext: {
-            title: examData.title,
-            description: examData.description,
-          }
+        // Esta parte se mantiene igual: preparas los datos para la IA.
+        const examData = getValues();
+        const input: GenerateExamQuestionsInput = {
+            examTitle: examData.title,
+            examDescription: examData.description,
+            numQuestions: aiDialogOptions.numQuestions,
+            topic: aiDialogOptions.topic || undefined,
+            questionTypeToGenerate: aiDialogOptions.questionTypeToGenerate === "ANY" ? undefined : aiDialogOptions.questionTypeToGenerate as ConcreteAIQuestionType,
+            contextText: aiDialogOptions.contextText || undefined,
+            additionalInstructions: aiDialogOptions.additionalInstructions || undefined,
         };
-        const webhookResponse = await fetch('http://localhost:5678/webhook-test/3183924a-e128-4952-a135-7787655832fc', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(webhookPayload),
+
+        // --- INICIO DEL CÓDIGO MODIFICADO ---
+
+        // El bloque del webhook ha sido eliminado.
+        // La llamada directa a 'generateExamQuestions' ha sido reemplazada por 'fetch'.
+
+        // 1. Llama a tu API usando fetch.
+        const response = await fetch('/api/generate-questions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(input), // Envía el objeto 'input' que creaste arriba.
         });
-        if (!webhookResponse.ok) {
-          console.warn(`AI Generation Webhook call failed with status: ${webhookResponse.status}. Response:`, await webhookResponse.text());
-        } else {
-          console.log('AI Generation Webhook call successful.');
+
+        // 2. Obtiene la respuesta en formato JSON de la API.
+        const result = await response.json();
+
+        // 3. Si la respuesta de la API indica un error, lo lanzamos para que el 'catch' lo maneje.
+        if (!response.ok) {
+            throw new Error(result.error || 'Ocurrió un error en el servidor al generar las preguntas.');
         }
-      } catch (webhookError) {
-        console.warn('Error calling AI Generation webhook:', webhookError);
-      }
+
+        // --- FIN DEL CÓDIGO MODIFICADO ---
 
 
-      const result = await generateExamQuestions(input);
-      if (result.generatedQuestions && result.generatedQuestions.length > 0) {
-        const newFormQuestions: QuestionFormValues[] = result.generatedQuestions.map((aiQ, index) => {
-          const questionId = `q-ai-${Date.now()}-${index}`;
-          let adaptedQuestion: Partial<QuestionFormValues> & { type: AIQuestion['type'] } = {
-            id: questionId,
-            text: (aiQ.type === 'cloze' ? aiQ.textWithPlaceholders : aiQ.text) || "",
-            points: aiQ.points ?? 10,
-            feedback: aiQ.feedback ?? "",
-            type: aiQ.type,
-          };
+        // El resto de tu lógica para procesar el resultado no necesita cambios,
+        // ya que la variable 'result' tiene la misma estructura que antes.
+        if (result.generatedQuestions && result.generatedQuestions.length > 0) {
+            const newFormQuestions: QuestionFormValues[] = result.generatedQuestions.map((aiQ, index) => {
+                const questionId = `q-ai-${Date.now()}-${index}`;
+                let adaptedQuestion: Partial<QuestionFormValues> & { type: AIQuestion['type'] } = {
+                    id: questionId,
+                    text: (aiQ.type === 'cloze' ? aiQ.textWithPlaceholders : aiQ.text) || "",
+                    points: aiQ.points ?? 10,
+                    feedback: aiQ.feedback ?? "",
+                    type: aiQ.type,
+                };
 
-          switch (aiQ.type) {
-            case "multiple-choice":
-            case "multiple-response":
-              adaptedQuestion.options = aiQ.options.map((opt, optIdx) => ({
-                id: opt.id || `opt-ai-${questionId}-${optIdx}`,
-                text: opt.text,
-                isCorrect: opt.isCorrect,
-              }));
-              adaptedQuestion.randomizeOptions = aiQ.randomizeOptions;
-              break;
-            case "weighted-choice":
-              adaptedQuestion.options = aiQ.options.map((opt, optIdx) => ({
-                id: opt.id || `opt-ai-wc-${questionId}-${optIdx}`,
-                text: opt.text,
-                percentage: opt.percentage,
-              }));
-              adaptedQuestion.randomizeOptions = aiQ.randomizeOptions;
-              adaptedQuestion.allowMultipleSelections = aiQ.allowMultipleSelections;
-              break;
-            case "argument-reconstruction":
-              const itemsWithIds = aiQ.items.map((item, itemIdx) => ({
-                id: item.id || `item-ai-${questionId}-${itemIdx}`,
-                text: item.text,
-              }));
-              adaptedQuestion.items = itemsWithIds;
-              adaptedQuestion.correctOrder = itemsWithIds.map(item => item.id!);
-              break;
-            case "true-false-justification":
-              adaptedQuestion.affirmation = aiQ.affirmation;
-              adaptedQuestion.isAffirmationTrue = aiQ.isAffirmationTrue;
-              adaptedQuestion.pointsForAffirmation = aiQ.pointsForAffirmation ?? 5;
-              adaptedQuestion.pointsForJustification = aiQ.pointsForJustification ?? 5;
-              adaptedQuestion.points = (adaptedQuestion.pointsForAffirmation) + (adaptedQuestion.pointsForJustification);
-              adaptedQuestion.justificationOptions = aiQ.justificationOptions.map((opt, optIdx) => ({
-                id: opt.id || `opt-ai-tfj-${questionId}-${optIdx}`,
-                text: opt.text,
-                isCorrect: opt.isCorrect,
-              }));
-              adaptedQuestion.randomizeJustificationOptions = aiQ.randomizeJustificationOptions;
-              break;
-            case "true-false-complex":
-              adaptedQuestion.statement = aiQ.statement;
-              adaptedQuestion.isStatementTrue = aiQ.isStatementTrue;
-              break;
-            case "cloze":
-              adaptedQuestion.textWithPlaceholders = aiQ.textWithPlaceholders;
-              adaptedQuestion.subQuestions = aiQ.subQuestions.map((sq, sqIdx) => ({
-                id: sq.id || `csq-ai-${questionId}-${sqIdx}`,
-                placeholderLabel: sq.placeholderLabel,
-                type: sq.type,
-                points: sq.points,
-                options: sq.options?.map((opt, optIdx) => ({
-                  id: opt.id || `csqo-ai-${questionId}-${sqIdx}-${optIdx}`,
-                  text: opt.text,
-                  percentage: opt.percentage,
-                  isCorrect: opt.isCorrect,
-                  feedback: opt.feedback,
-                })),
-                correctAnswer: sq.correctAnswer,
-                allowMultipleSelectionsInSubQuestion: sq.allowMultipleSelectionsInSubQuestion,
-                randomizeSubQuestionOptions: sq.randomizeSubQuestionOptions,
-              }));
-              break;
-          }
-          return adaptedQuestion as QuestionFormValues;
-        });
-        append(newFormQuestions);
-        toast({ title: "Éxito", description: `${newFormQuestions.length} preguntas generadas por IA y añadidas.` });
-      } else {
-        toast({ title: "Información", description: "La IA no generó preguntas esta vez.", variant: "default" });
-      }
+                switch (aiQ.type) {
+                    case "multiple-choice":
+                    case "multiple-response":
+                        adaptedQuestion.options = aiQ.options.map((opt, optIdx) => ({
+                            id: opt.id || `opt-ai-${questionId}-${optIdx}`,
+                            text: opt.text,
+                            isCorrect: opt.isCorrect,
+                        }));
+                        adaptedQuestion.randomizeOptions = aiQ.randomizeOptions;
+                        break;
+                    case "weighted-choice":
+                        adaptedQuestion.options = aiQ.options.map((opt, optIdx) => ({
+                            id: opt.id || `opt-ai-wc-${questionId}-${optIdx}`,
+                            text: opt.text,
+                            percentage: opt.percentage,
+                        }));
+                        adaptedQuestion.randomizeOptions = aiQ.randomizeOptions;
+                        adaptedQuestion.allowMultipleSelections = aiQ.allowMultipleSelections;
+                        break;
+                    case "argument-reconstruction":
+                        const itemsWithIds = aiQ.items.map((item, itemIdx) => ({
+                            id: item.id || `item-ai-${questionId}-${itemIdx}`,
+                            text: item.text,
+                        }));
+                        adaptedQuestion.items = itemsWithIds;
+                        adaptedQuestion.correctOrder = itemsWithIds.map(item => item.id!);
+                        break;
+                    case "true-false-justification":
+                        adaptedQuestion.affirmation = aiQ.affirmation;
+                        adaptedQuestion.isAffirmationTrue = aiQ.isAffirmationTrue;
+                        adaptedQuestion.pointsForAffirmation = aiQ.pointsForAffirmation ?? 5;
+                        adaptedQuestion.pointsForJustification = aiQ.pointsForJustification ?? 5;
+                        adaptedQuestion.points = (adaptedQuestion.pointsForAffirmation) + (adaptedQuestion.pointsForJustification);
+                        adaptedQuestion.justificationOptions = aiQ.justificationOptions.map((opt, optIdx) => ({
+                            id: opt.id || `opt-ai-tfj-${questionId}-${optIdx}`,
+                            text: opt.text,
+                            isCorrect: opt.isCorrect,
+                        }));
+                        adaptedQuestion.randomizeJustificationOptions = aiQ.randomizeJustificationOptions;
+                        break;
+                    case "true-false-complex":
+                        adaptedQuestion.statement = aiQ.statement;
+                        adaptedQuestion.isStatementTrue = aiQ.isStatementTrue;
+                        break;
+                    case "cloze":
+                        adaptedQuestion.textWithPlaceholders = aiQ.textWithPlaceholders;
+                        adaptedQuestion.subQuestions = aiQ.subQuestions.map((sq, sqIdx) => ({
+                            id: sq.id || `csq-ai-${questionId}-${sqIdx}`,
+                            placeholderLabel: sq.placeholderLabel,
+                            type: sq.type,
+                            points: sq.points,
+                            options: sq.options?.map((opt, optIdx) => ({
+                                id: opt.id || `csqo-ai-${questionId}-${sqIdx}-${optIdx}`,
+                                text: opt.text,
+                                percentage: opt.percentage,
+                                isCorrect: opt.isCorrect,
+                                feedback: opt.feedback,
+                            })),
+                            correctAnswer: sq.correctAnswer,
+                            allowMultipleSelectionsInSubQuestion: sq.allowMultipleSelectionsInSubQuestion,
+                            randomizeSubQuestionOptions: sq.randomizeSubQuestionOptions,
+                        }));
+                        break;
+                }
+                return adaptedQuestion as QuestionFormValues;
+            });
+            append(newFormQuestions);
+            toast({ title: "Éxito", description: `${newFormQuestions.length} preguntas generadas por IA y añadidas.` });
+        } else {
+            toast({ title: "Información", description: "La IA no generó preguntas esta vez.", variant: "default" });
+        }
     } catch (error) {
-      console.error("Error generating AI questions:", error);
-      let errorMessage = "No se pudieron generar preguntas con IA.";
-      if (error instanceof Error) {
-        if (error.message.includes("overloaded") || error.message.includes("Service Unavailable")) {
-          errorMessage = "El servicio de IA está temporalmente sobrecargado. Por favor, intenta de nuevo más tarde.";
-        } else if (error.message.includes("La IA no generó preguntas")) {
-          errorMessage = error.message;
-        } else {
-          errorMessage = `Error de IA: ${error.message}`;
+        console.error("Error generating AI questions:", error);
+        let errorMessage = "No se pudieron generar preguntas con IA.";
+        if (error instanceof Error) {
+            if (error.message.includes("overloaded") || error.message.includes("Service Unavailable")) {
+                errorMessage = "El servicio de IA está temporalmente sobrecargado. Por favor, intenta de nuevo más tarde.";
+            } else if (error.message.includes("La IA no generó preguntas")) {
+                errorMessage = error.message;
+            } else {
+                errorMessage = `Error de IA: ${error.message}`;
+            }
         }
-      }
-      toast({ title: "Error de IA", description: errorMessage, variant: "destructive" });
+        toast({ title: "Error de IA", description: errorMessage, variant: "destructive" });
     }
     setIsGeneratingAI(false);
     setIsAIDialogOpen(false);
-  };
+};
 
   const handleJsonFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
