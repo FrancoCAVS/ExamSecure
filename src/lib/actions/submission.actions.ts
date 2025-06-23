@@ -1,12 +1,15 @@
+// Pega este código completo en "src/lib/actions/submission.actions.ts"
+// Reemplaza tu función existente.
 
 "use server";
 
 import { z } from "zod";
 import { redirect } from "next/navigation";
-import type { Answer, GradeEssayQuestionOutput, Submission, Question, Exam as ExamType, MultipleChoiceQuestion, MultipleResponseQuestion, WeightedChoiceQuestion, ArgumentReconstructionQuestion, TrueFalseJustificationQuestion, TrueFalseComplexQuestion, ClozeQuestion, Infraction } from "@/lib/types";
-import { gradeEssayQuestion } from "@/ai/flows/grade-essay-question";
+import type { Answer, GradeEssayQuestionOutput, Submission, Infraction, Question, Exam as ExamType, MultipleChoiceQuestion, MultipleResponseQuestion, WeightedChoiceQuestion, ArgumentReconstructionQuestion, TrueFalseJustificationQuestion, TrueFalseComplexQuestion, ClozeQuestion } from "@/lib/types";
+// IMPORTANTE: La importación de 'gradeEssayQuestion' ha sido eliminada.
 import { getExamById, saveSubmission } from "@/lib/db";
 
+// Los schemas de Zod se mantienen igual que en tu código original.
 const AnswerSchemaValidation = z.object({
   questionId: z.string(),
   value: z.any(), 
@@ -144,13 +147,35 @@ export async function submitExamAnswers(prevState: any, formData: FormData) {
             const essayAnswer = answer.value as string;
             const questionText = questionDetail.text;
             if(essayAnswer && essayAnswer.trim() !== "") {
-              const gradingResult = await gradeEssayQuestion({ question: questionText, answer: essayAnswer });
-              if (gradingResult) essayGradingResults.push({ questionId: answer.questionId, feedback: gradingResult });
+              // --- INICIO DEL CÓDIGO REFACTORIZADO ---
+              // Se reemplaza la llamada directa a Genkit por una llamada fetch a nuestra API.
+              
+              const baseUrl = process.env.VERCEL_URL 
+                ? `https://${process.env.VERCEL_URL}` 
+                : 'http://localhost:3000';
+
+              const response = await fetch(`${baseUrl}/api/grade-essay`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  question: questionText,
+                  answer: essayAnswer,
+                }),
+              });
+
+              const gradingResult: GradeEssayQuestionOutput = await response.json();
+
+              if (!response.ok) {
+                console.error(`AI grading API failed for question ${answer.questionId}:`, gradingResult);
+              } else if (gradingResult) {
+                essayGradingResults.push({ questionId: answer.questionId, feedback: gradingResult });
+              }
+              // --- FIN DEL CÓDIGO REFACTORIZADO ---
             }
           } catch (aiError) {
-            console.error(`AI grading failed for free-text question ${answer.questionId}:`, aiError);
+            console.error(`Fetch to AI grading API failed for free-text question ${answer.questionId}:`, aiError);
           }
-          questionScore = 0; // Free text questions are not auto-scored
+          questionScore = 0; // El puntaje no se asigna automáticamente aquí.
           break;
         case "cloze":
           questionScore = 0; // TODO: Implement Cloze scoring logic
