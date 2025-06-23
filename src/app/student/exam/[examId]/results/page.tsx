@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getSubmissionById, getExamById } from "@/lib/db";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+export const runtime = 'edge';
 
 export const dynamic = 'force-dynamic';
 

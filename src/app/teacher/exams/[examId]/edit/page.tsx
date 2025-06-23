@@ -6,6 +6,7 @@ import { AlertCircle, Edit3 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { createSupabaseServerClient, getUserProfile } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+export const runtime = 'edge';
 
 export default async function EditExamPage({ 
     params 

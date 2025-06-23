@@ -9,6 +9,7 @@ import { createSupabaseServerClient, getUserProfile } from "@/lib/supabase/serve
 import { redirect } from "next/navigation";
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
 
 // Mock data - en una aplicación real, esto vendría de una API
 const upcomingExams = [

@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
+export const runtime = 'edge';
+
 export const dynamic = 'force-dynamic';
 
 export default async function TakeExamPage({

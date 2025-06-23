@@ -7,6 +7,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
 
 function formatTimeTaken(seconds: number | null | undefined): string {
   if (seconds === null || seconds === undefined) return "N/A";

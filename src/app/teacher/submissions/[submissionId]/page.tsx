@@ -12,6 +12,7 @@ import { QuestionScoreForm } from "@/components/teacher/QuestionScoreForm";
 
 export const dynamic = 'force-dynamic';
 
+export const runtime = 'edge';
 export default async function TeacherSubmissionPage({ 
     params 
 }: { 

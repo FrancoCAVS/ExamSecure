@@ -15,6 +15,7 @@ import { redirect } from "next/navigation";
 import { publishExamGradesAction } from "@/lib/actions/teacher.actions";
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
 
 interface EnrichedSubmission extends Submission {
   studentApellidosNombres?: string;

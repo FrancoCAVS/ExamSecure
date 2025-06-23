@@ -14,6 +14,7 @@ interface SubmissionWithExamDetails extends Submission {
   examDuration?: number;
 }
 
+export const runtime = 'edge';
 export default async function StudentHistoryForTeacherPage({
   params,
 }: {

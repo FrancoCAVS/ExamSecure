@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Edit3 } from "lucide-react";
 import { createSupabaseServerClient, getUserProfile } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+export const runtime = 'edge';
 
 export default async function CreateExamPage() {
   const supabase = await createSupabaseServerClient();

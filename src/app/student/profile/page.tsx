@@ -4,6 +4,7 @@ import { User, UserCircle } from "lucide-react";
 import { createSupabaseServerClient, getUserProfile } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+export const runtime = 'edge';
 
 export const dynamic = 'force-dynamic';
 
