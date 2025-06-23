@@ -1,5 +1,4 @@
 
-'use server';
 /**
  * @fileOverview AI flow to generate exam questions based on provided criteria.
  * This file uses 'use server' and should only export async functions.
