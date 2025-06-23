@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ShieldCheck, LogIn, UserPlus } from "lucide-react";
 import { createSupabaseServerClient, getUserProfile } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+ export const runtime = 'edge'
 
 export default async function HomePage() {
   const supabase = await createSupabaseServerClient();

@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { gradeEssayQuestion } from '@/ai/flows/grade-essay-question';
 import { z } from 'zod';
+export const runtime = 'edge'
 
 // Esquema para validar la entrada de la API
 const GradeEssayInputSchema = z.object({
