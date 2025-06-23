@@ -4,6 +4,8 @@ import { Logo } from "@/components/shared/Logo";
 import { createSupabaseServerClient, getUserProfile } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
+export const runtime = 'edge';
+
 export default async function SignUpPage() {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();

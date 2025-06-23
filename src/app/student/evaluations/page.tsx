@@ -10,6 +10,8 @@ import type { Submission } from "@/lib/types";
 import { createSupabaseServerClient, getUserProfile } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
+
+export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 interface EnrichedSubmission extends Submission {
