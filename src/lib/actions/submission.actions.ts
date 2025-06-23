@@ -1,5 +1,3 @@
-// Pega este código completo en "src/lib/actions/submission.actions.ts"
-// Reemplaza tu función existente.
 
 "use server";
 
