@@ -1,0 +1,231 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 29% 96%;
+    --foreground: 231 15% 18%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 231 15% 18%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 231 15% 18%;
+
+    --primary: 231 48% 48%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 25% 90%;
+    --secondary-foreground: 231 15% 18%;
+
+    --muted: 210 25% 90%;
+    --muted-foreground: 231 10% 45%;
+
+    --accent: 174 100% 29%;
+    --accent-foreground: 180 100% 98%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 210 20% 85%;
+    --input: 210 20% 88%;
+    --ring: 231 48% 48%;
+
+    --radius: 0.5rem;
+
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 231 15% 18%;
+    --sidebar-primary: 231 48% 48%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 174 100% 29%;
+    --sidebar-accent-foreground: 180 100% 98%;
+    --sidebar-border: 210 20% 85%;
+    --sidebar-ring: 231 48% 48%;
+  }
+
+  .dark {
+    --background: 231 15% 18%;
+    --foreground: 210 29% 96%;
+
+    --card: 231 15% 18%;
+    --card-foreground: 210 29% 96%;
+
+    --popover: 231 15% 18%;
+    --popover-foreground: 210 29% 96%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 231 48% 48%;
+
+    --secondary: 231 15% 25%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 231 15% 25%;
+    --muted-foreground: 210 20% 65%;
+
+    --accent: 174 100% 39%; /* Adjusted Teal for dark mode */
+    --accent-foreground: 231 15% 18%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 231 15% 28%;
+    --input: 231 15% 28%;
+    --ring: 210 40% 98%;
+    
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+
+    --sidebar-background: 231 15% 15%;
+    --sidebar-foreground: 210 29% 96%;
+    --sidebar-primary: 210 40% 98%;
+    --sidebar-primary-foreground: 231 48% 48%;
+    --sidebar-accent: 174 100% 39%;
+    --sidebar-accent-foreground: 231 15% 18%;
+    --sidebar-border: 231 15% 28%;
+    --sidebar-ring: 210 40% 98%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .print-hide {
+    display: none !important;
+  }
+  body {
+    margin: 0;
+    padding: 0.75cm !important; 
+    font-size: 10pt; 
+    color: black !important;
+    background-color: white !important;
+    -webkit-print-color-adjust: exact; 
+    print-color-adjust: exact;
+  }
+
+  /* PageHeader specific styles for print */
+  div[class*="PageHeader_actions__"] { /* Target action container in PageHeader more robustly */
+    display: none !important;
+  }
+  /* If PageHeader component's root has a specific identifiable class, use that. Otherwise, target by structure if safe. */
+  /* Example: .page-header-root-class > .page-header-flex-container > div:last-child { display: none !important; } */
+  /* For the general PageHeader, ensure title and description are styled for print */
+  .mb-8.pb-4.border-b { /* This targets the PageHeader root */
+    border-bottom: 1px solid #ccc !important;
+    padding-bottom: 0.5rem !important;
+    margin-bottom: 1rem !important;
+  }
+  .mb-8.pb-4.border-b h1 {
+    font-size: 1.3rem !important; /* Adjusted from 1.5rem for balance */
+    text-align: center !important;
+    color: black !important;
+  }
+   .mb-8.pb-4.border-b h1 svg { /* Ensure icon in PageHeader title prints */
+    display: inline-block !important;
+    height: 1.1rem !important;
+    width: 1.1rem !important;
+    margin-right: 0.3rem !important;
+    vertical-align: text-bottom;
+  }
+  .mb-8.pb-4.border-b p {
+    font-size: 0.85rem !important; /* Adjusted from 0.9rem */
+    text-align: center !important;
+    color: #333 !important;
+    margin-top: 0.2rem !important;
+  }
+
+
+  .printable-area {
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background-color: white !important;
+  }
+  .printable-area .card-header, .printable-area .card-content, .printable-area .card-title, .printable-area .card-description {
+    color: black !important;
+    background-color: white !important;
+  }
+  .printable-area table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9pt;
+  }
+  .printable-area th, .printable-area td {
+    border: 1px solid #666; 
+    padding: 4px 6px;
+    text-align: left;
+    color: black !important;
+  }
+  .printable-area th {
+    background-color: #e0e0e0 !important; 
+    font-weight: bold;
+  }
+  .status-badge-print {
+    border: 1px solid #555 !important;
+    background-color: transparent !important; 
+    color: black !important;
+    padding: 1px 4px !important;
+    font-size: 0.7rem !important;
+    border-radius: 3px !important;
+    display: inline-flex !important;
+    align-items: center;
+  }
+  .status-badge-print svg {
+    display: inline-block !important;
+    margin-right: 3px !important;
+    height: 0.8em !important; 
+    width: 0.8em !important;
+    fill: currentColor !important; 
+  }
+  
+  .status-badge-print .lucide-check-circle { fill: green !important; color: green !important; }
+  .status-badge-print .lucide-alert-circle { fill: red !important; color: red !important; }
+  .status-badge-print .lucide-help-circle { fill: dimgray !important; color: dimgray !important; }
+  
+  a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+  .question-block-print {
+    page-break-inside: avoid;
+    margin-bottom: 1rem; 
+    padding: 0.5rem 0.25rem; 
+    border-width: 1px; 
+  }
+  
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Ensure print-hide also targets the actions div in PageHeader if necessary by structure */
+/* This is a fallback if a more specific selector in PageHeader itself isn't used/possible */
+@media print {
+    .mb-8.pb-4.border-b > div > div:last-child.print-hide {
+        display: none !important;
+    }
+}
+
