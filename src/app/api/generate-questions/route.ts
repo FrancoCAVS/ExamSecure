@@ -6,7 +6,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateExamQuestions } from '@/ai/flows/generate-exam-questions-flow';
 
 // Ya no necesitamos 'runFlow', así que lo eliminamos.
-export const runtime = 'edge'
+export const runtime = 'nodejs'
+
 import { GenerateExamQuestionsInputSchema } from '@/ai/flows/generate-exam-questions-types';
 
 export async function POST(request: NextRequest) {
